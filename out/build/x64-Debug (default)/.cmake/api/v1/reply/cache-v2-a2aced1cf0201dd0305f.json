@@ -1371,7 +1371,7 @@
 				}
 			],
 			"type" : "FILEPATH",
-			"value" : "GITCOMMAND-NOTFOUND"
+			"value" : "C:/Program Files/Git/cmd/git.exe"
 		},
 		{
 			"name" : "HGCOMMAND",
