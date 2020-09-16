@@ -1,0 +1,7 @@
+[
+{
+  "directory": "/home/mojtaba/projects/mylbm/build",
+  "command": "/usr/bin/g++-7   -g -o CMakeFiles/mylbm.dir/main.cpp.o -c /home/mojtaba/projects/mylbm/main.cpp",
+  "file": "/home/mojtaba/projects/mylbm/main.cpp"
+}
+]
