@@ -1,0 +1,7 @@
+[
+{
+  "directory": "/media/mojtaba/data/MyCode/mylbm/build",
+  "command": "/usr/bin/g++-7   -g -o CMakeFiles/mylbm.dir/main.cpp.o -c /media/mojtaba/data/MyCode/mylbm/main.cpp",
+  "file": "/media/mojtaba/data/MyCode/mylbm/main.cpp"
+}
+]
