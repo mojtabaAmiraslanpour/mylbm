@@ -1,0 +1,22 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/media/mojtaba/data/MyCode/mylbm/src/grid.H
+iostream
+-
+
+/media/mojtaba/data/MyCode/mylbm/src/problem.C
+problem.H
+/media/mojtaba/data/MyCode/mylbm/src/problem.H
+
+/media/mojtaba/data/MyCode/mylbm/src/problem.H
+iostream
+-
+grid.H
+/media/mojtaba/data/MyCode/mylbm/src/grid.H
+

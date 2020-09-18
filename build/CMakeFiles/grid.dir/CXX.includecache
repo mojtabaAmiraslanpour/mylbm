@@ -1,0 +1,14 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/media/mojtaba/data/MyCode/mylbm/grid.C
+grid.H
+/media/mojtaba/data/MyCode/mylbm/grid.H
+
+/media/mojtaba/data/MyCode/mylbm/grid.H
+

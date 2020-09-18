@@ -1,0 +1,26 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+../src/grid.H
+iostream
+-
+
+../src/problem.H
+iostream
+-
+grid.H
+../src/grid.H
+
+/media/mojtaba/data/MyCode/mylbm/main.cpp
+iostream
+-
+grid.H
+/media/mojtaba/data/MyCode/mylbm/grid.H
+problem.H
+/media/mojtaba/data/MyCode/mylbm/problem.H
+
