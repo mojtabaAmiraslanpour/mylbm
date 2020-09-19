@@ -58,10 +58,12 @@ obst(:,[1,ly]) = 1;    % Location of top/bottom boundary
 bbRegion = find(obst); % Boolean mask for bounce-back cells
 
 % INITIAL CONDITION: Poiseuille profile at equilibrium
-L = ly-2; y_phys = y-1.5;
+L = ly-2;
+y_phys = y-1.5;
 ux = 4 * uMax / (L*L) * (y_phys.*L-y_phys.*y_phys);
 uy = zeros(lx,ly);
 rho = 1;
+
 for i=1:9
     cu = 3*(cx(i)*ux+cy(i)*uy);
     fIn(i,:,:) = rho .* t(i) .* ...

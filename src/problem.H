@@ -10,9 +10,17 @@ class problem
 {
     public:
 
-    problem(const grid& mesh__, double f__);
+    const int q;
+    const int lx;
+    const int ly;
 
-    int initialize();
+    // Declaration of the population function
+    double*** f;
+
+    problem(const grid& mesh__, int q__);
+    ~problem();
+
+    int initialize(const double rho__, double Ux__[100], const double Uy__);
 };
 
 #endif
