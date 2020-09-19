@@ -25,9 +25,9 @@ int L = ly_ - 2;
 
 int main(int, char**) {
 
-    grid mesh_(lx_,ly_);
-    double f;
+    grid mesh_(lx_, ly_);
+    double f = 1.0;
     problem cylinder(mesh_, f);
 
     cylinder.initialize();
-}
+};

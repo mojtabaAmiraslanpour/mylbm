@@ -1,2 +1,2 @@
-add_library(grid grid.C)
-add_library(problem problem.C)
+add_library(grid grid.cpp)
+add_library(problem problem.cpp)
