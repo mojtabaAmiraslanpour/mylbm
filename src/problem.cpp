@@ -1,10 +1,14 @@
-#include "problem.H"
-#include "grid.H"
+#include "problem.h"
+#include "grid.h"
+#include <math.h>
 
-problem::problem(const grid& mesh__, int q__):
+problem::problem(const grid& mesh__, int q__,const int *cx__,const int *cy__, const double *w__):
 lx(mesh__.lx),
 ly(mesh__.ly),
-q(q__)
+q(q__),
+cx(cx__),
+cy(cy__),
+w(w__)
 {
     cout << "This is problem constructor.\n";
 
@@ -38,18 +42,61 @@ int problem::initialize(const double uMax__)
 
     int L = ly - 2;
     uMax = uMax__;
-    // Initial conditions with macroscopic values
-    double rho = 1.0;
-    double Ux[100] = {};
-    //double y_phys = ly_ - 0.5;
-    for (int i = 0; i < ly; i++) { // Here we have not used y_phys which we have one
-    // additional member in the vector beyond zero.
-        Ux[i] = 4. * uMax / (L * L) * (L * i - i * i);
-    }
-    double Uy = 0.0;
 
-    for(int i =0; i<100; i++){
-        std::cout << Ux[i] << endl;
+    // Initial conditions with macroscopic values -----------------------------
+
+    // Defining rho
+    double** rho = new double*[lx];
+    for (int i=0; i<lx; i++){
+        rho[i] = new double[ly];
+        for (int j=0; j<ly; j++){
+            rho[i][j] = 1.0;
+        }
     }
+
+    // Defining Ux
+    //double y_phys = ly_ - 0.5;
+    double** Ux = new double*[lx];
+    for (int i=0; i<lx; i++){
+        Ux[i] = new double[ly];
+        for (int j=0; j<ly; j++){
+            Ux[i][j] = 4. * uMax / (L * L) * (L * j - j * i); // Not used y_phys
+        }
+    }
+
+    // Defining Uy
+    double** Uy = new double*[lx];
+    for (int i=0; i<lx; i++){
+        Uy[i] = new double[ly];
+        for (int j=0; j<ly; j++){
+            Uy[i][j] = 0;
+        }
+    }
+
+    // Defining c * u
+    double** cu = new double*[lx];
+    for (int i=0; i<lx; i++){
+        cu[i] = new double[ly];
+        for (int j=0; j<ly; j++){
+            cu[i][j] = 0;
+        }
+    }
+
+    // Initializing f
+    for (int k=0; k<q; k++){
+        for (int i=0; i<lx; i++){
+            for (int j=0; j<ly; j++){
+                cu[i][j] = 3.0*(cx[k]*Ux[i][j] + cy[k]*Uy[i][j]);
+                f[k][i][j] = rho[i][j] * w[k] * (1.0 + cu[i][j] + 
+                0.5 * pow(cu[i][j],2.0) - 1.5 * (pow(Ux[i][j], 2.0) + 
+                pow(Uy[i][j], 2.0)));
+            }
+        }
+    }
+
+    // for(int i =0; i<100; i++){
+    //     std::cout << Ux[i] << endl;
+    // }
+
     return 0;
 };

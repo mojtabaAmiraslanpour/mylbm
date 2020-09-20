@@ -26,7 +26,7 @@ int main(int, char**) {
     grid mesh_(lx_, ly_);
 
     // Defining the problem
-    problem cylinder(mesh_, q_);
+    problem cylinder(mesh_, q_, cx_, cy_, w_);
 
     // initialization of the population with macroscopic variables
     cylinder.initialize(uMax_);

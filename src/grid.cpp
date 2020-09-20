@@ -1,4 +1,4 @@
-#include "grid.H"
+#include "grid.h"
 
 grid::grid(const int lx__, const int ly__):
 lx(lx__),
