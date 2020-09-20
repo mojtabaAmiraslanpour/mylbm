@@ -21,7 +21,6 @@ q(q__)
     }
 };
 
-
 problem::~problem() { 
     /*
     for(int i = 0; i < q; i++){
@@ -33,11 +32,24 @@ problem::~problem() {
     delete[] f; 
     }
 
-int problem::initialize(const double rho__, double Ux__[100], const double Uy__)
+int problem::initialize(const double uMax__)
 {
     cout << "This is the initializer.\n";
+
+    int L = ly - 2;
+    uMax = uMax__;
+    // Initial conditions with macroscopic values
+    double rho = 1.0;
+    double Ux[100] = {};
+    //double y_phys = ly_ - 0.5;
+    for (int i = 0; i < ly; i++) { // Here we have not used y_phys which we have one
+    // additional member in the vector beyond zero.
+        Ux[i] = 4. * uMax / (L * L) * (L * i - i * i);
+    }
+    double Uy = 0.0;
+
     for(int i =0; i<100; i++){
-        std::cout << Ux__[i] << endl;
+        std::cout << Ux[i] << endl;
     }
     return 0;
 };
