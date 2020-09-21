@@ -18,14 +18,12 @@ public:
     const int *cx;
     const int *cy;
     const double *w;
-    
-    // Declaration of the population function
-    double*** f;
 
     problem(const grid& mesh__, int q__,const int *cx__,const int *cy__, const double *w__);
     ~problem();
 
-    int initialize(const double uMax__);
+    int initialize(const double uMax__, double*** f__, double** rho__, double** Ux__, double** Uy__);
+
 };
 
 #endif
