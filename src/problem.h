@@ -24,6 +24,8 @@ public:
 
     int initialize(const double uMax__, double*** f__, double** rho__, double** Ux__, double** Uy__);
 
+    int test(const double *A__);
+
 };
 
 #endif

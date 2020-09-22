@@ -79,12 +79,15 @@ int main(int, char**) {
     for (int i = 0; i < q_; i++) {
         for (int j = 0; j < lx_; j++) {
             for (int k = 0; k < ly_; k++) {
-                if (f_[i][j][k] != 0) {
-                    cout << f_[i][j][k] << endl;
-                }
+                // if (f_[i][j][k] != 0) {
+                //     cout << f_[i][j][k] << endl;
+                //}
             }
         }
     }
+
+    double A_[5]  = {4/9, 1/9,1/9,1/9,1/9};
+    cylinder.test(A_);
 
     for (int iter = 0; iter < iter_; iter++) {
         

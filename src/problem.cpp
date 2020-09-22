@@ -12,7 +12,9 @@ cy(cy__),
 w(w__)
 {
     cout << "This is problem constructor.\n";
-
+    // for (int k=0; k<q; k++){
+    //     cout << w[k] << endl;
+    // }
 };
 
 // Destructor
@@ -36,13 +38,20 @@ int problem::initialize(const double uMax__, double*** f__, double** rho__, doub
         for (int i=0; i<lx; i++){
             for (int j=0; j<ly; j++){
                 cu[i][j] = 3.0*(cx[k]*Ux__[i][j] + cy[k]*Uy__[i][j]);
-                //f__[k][i][j] = rho__[i][j] * w[k] * (1.0 + cu[i][j] + 
-                //0.5 * pow(cu[i][j],2.0) - 1.5 * (pow(Ux__[i][j], 2.0) + 
-                //pow(Uy__[i][j], 2.0)));
-                f__[k][i][j] = 1.0;
+                f__[k][i][j] = rho__[i][j] * w[k] * (1.0 + cu[i][j] + 
+                0.5 * pow(cu[i][j],2.0) - 1.5 * (pow(Ux__[i][j], 2.0) + 
+                pow(Uy__[i][j], 2.0)));
+
+                //cout << w[k] << endl;
             }
         }
     }
 
     return 0;
 };
+
+int problem::test(const double *A__){
+    for (int i=0; i<5; i++){
+        cout << A__[i] << endl;
+    }  
+}
