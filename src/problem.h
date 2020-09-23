@@ -15,16 +15,12 @@ public:
     const int q;
     const int lx;
     const int ly;
-    const int *cx;
-    const int *cy;
-    const double *w;
 
-    problem(const grid& mesh__, int q__,const int *cx__,const int *cy__, const double *w__);
+    problem(const grid& mesh__, int q__);
     ~problem();
 
-    int initialize(const double uMax__, double*** f__, double** rho__, double** Ux__, double** Uy__);
-
-    int test(const double *A__);
+    int initialize(const double uMax__, double*** f__, double** rho__, double** Ux__, double** Uy__,
+const double* w__, const int* cx__, const int* cy__);
 
 };
 

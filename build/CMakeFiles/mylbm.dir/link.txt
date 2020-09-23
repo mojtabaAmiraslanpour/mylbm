@@ -1,0 +1,1 @@
+/usr/bin/g++-7 -g -rdynamic CMakeFiles/mylbm.dir/main.cpp.o -o mylbm  src/libgrid.a src/libproblem.a 
