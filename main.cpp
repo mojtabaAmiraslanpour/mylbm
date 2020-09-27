@@ -4,8 +4,8 @@
 
 // GENERAL FLOW CONSTANTS
 const int q_ = 9;
-const int lx_ = 40; // number of cells in x-direction
-const int ly_ = 10; // number of cells in y-direction
+const int lx_ = 1; // number of cells in x-direction
+const int ly_ = 6; // number of cells in y-direction
 double pos_x_ = lx_/5; // position of the cylinder; (exact
 double pos_y_ = ly_/2+3; // y-symmetry is avoided)
 double radius_ = ly_/10+1; // radius of the cylinder
@@ -19,13 +19,10 @@ int tPlot_ = 50; // cycles
 // Using D2Q9
 double w_[q_]  = {4.0/9.0, 1.0/9.0, 1.0/9.0, 1.0/9.0, 1.0/9.0,
  1.0/36, 1.0/36, 1.0/36, 1.0/36}; // Weights
-
 int cx_[q_] = {0,   1,  0, -1,  0,    1,  -1,  -1,   1};
 int cy_[q_] = {0,   0,  1,  0, -1,    1,   1,  -1,  -1};
 
 int main(int, char**) {
-
-    int L = ly_ - 2;
 
     // Initial conditions with macroscopic values -----------------------------
     // Defining rho
@@ -38,12 +35,15 @@ int main(int, char**) {
     }
 
     // Defining Ux
-    //double y_phys = ly_ - 0.5;
+    double y_;
+    int L = ly_-2;
     double** Ux_ = new double* [lx_];
     for (int i = 0; i < lx_; i++) {
         Ux_[i] = new double[ly_];
         for (int j = 0; j < ly_; j++) {
-            Ux_[i][j] = 4. * uMax_ / (L * L) * (L * j - j * j); // Not used y_phys
+            y_ = j - 0.5;
+            Ux_[i][j] = 4. * uMax_ / (L * L) * (L * y_ - y_ * y_);
+            cout << i <<"   "<< j <<"   "<< Ux_[i][j] << endl;
         }
     }
 
@@ -78,14 +78,6 @@ int main(int, char**) {
     // initialization of the population with macroscopic variables
     cylinder.initialize(uMax_, f_, rho_, Ux_, Uy_, w_, cx_, cy_);
 
-    // for (int i = 0; i < q_; i++) {
-    //     for (int j = 0; j < lx_; j++) {
-    //         for (int k = 0; k < ly_; k++) {
-    //             cout << f_[i][j][k] << endl;
-    //         }
-    //     }
-    // }
-
     // Main loop
     for (int iter = 0; iter < iter_; iter++) {
 
@@ -104,18 +96,7 @@ int main(int, char**) {
                 }
             }
 
-            // Updating BCs
-            // Inlet: Poiseuille profile
-            for (int j = 0; j < ly_; j++) {
-                Ux_[0][j] = 4. * uMax_ / (L * L) * (L * j - j * j);
-                Uy_[0][j] = 0;
-                //rho_[i][j] = 
-            }
-
-
-
-
-
+            // No BCs yet. Only collision and streaming for a disturbance in a large field.
         }  
         
 
