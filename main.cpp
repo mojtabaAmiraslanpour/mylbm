@@ -5,7 +5,7 @@
 
 // GENERAL FLOW CONSTANTS
 const int q_ = 9;
-const int lx_ = 1; // number of cells in x-direction
+const int lx_ = 2; // number of cells in x-direction
 const int ly_ = 6; // number of cells in y-direction
 double pos_x_ = lx_/5; // position of the cylinder; (exact
 double pos_y_ = ly_/2+3; // y-symmetry is avoided)
@@ -26,7 +26,7 @@ int cy_[q_] = {0,   0,  1,  0, -1,    1,   1,  -1,  -1};
 
 int main(int, char**) {
 
-    // Initial conditions with macroscopic values -----------------------------
+    // Initial conditions with macroscopic values
     // Defining rho
     double** rho_ = new double* [lx_];
     for (int i = 0; i < lx_; i++) {
@@ -61,12 +61,12 @@ int main(int, char**) {
     // Defining population array f(q,lx,ly)
     double*** f_;
     f_ = new double** [q_];
-    for (int i = 0; i < q_; i++) {
-        f_[i] = new double* [lx_];
-        for (int j = 0; j < lx_; j++) {
-            f_[i][j] = new double[ly_];
-            for (int k = 0; k < ly_; k++) {
-                f_[i][j][k] = 0;
+    for (int k = 0; k < q_; k++) {
+        f_[k] = new double* [lx_];
+        for (int i = 0; i < lx_; i++) {
+            f_[k][i] = new double[ly_];
+            for (int j = 0; j < ly_; j++) {
+                f_[k][i][j] = 0;
             }
         }
     }
@@ -74,12 +74,12 @@ int main(int, char**) {
     // Defining population array fStar(q,lx,ly)
     double*** fStar_;
     fStar_ = new double** [q_];
-    for (int i = 0; i < q_; i++) {
-        fStar_[i] = new double* [lx_];
-        for (int j = 0; j < lx_; j++) {
-            fStar_[i][j] = new double[ly_];
-            for (int k = 0; k < ly_; k++) {
-                fStar_[i][j][k] = 0;
+    for (int k = 0; k < q_; k++) {
+        fStar_[k] = new double* [lx_];
+        for (int i = 0; i < lx_; i++) {
+            fStar_[k][i] = new double[ly_];
+            for (int j = 0; j < ly_; j++) {
+                fStar_[k][i][j] = 0;
             }
         }
     }
@@ -87,12 +87,12 @@ int main(int, char**) {
     // Defining population array fEq(q,lx,ly)
     double*** fEq_;
     fEq_ = new double** [q_];
-    for (int i = 0; i < q_; i++) {
-        fEq_[i] = new double* [lx_];
-        for (int j = 0; j < lx_; j++) {
-            fEq_[i][j] = new double[ly_];
-            for (int k = 0; k < ly_; k++) {
-                fEq_[i][j][k] = 0;
+    for (int k = 0; k < q_; k++) {
+        fEq_[k] = new double* [lx_];
+        for (int i = 0; i < lx_; i++) {
+            fEq_[k][i] = new double[ly_];
+            for (int j = 0; j < ly_; j++) {
+                fEq_[k][i][j] = 0;
             }
         }
     }
@@ -134,9 +134,9 @@ int main(int, char**) {
         }
 
         // Computing cu and fEq in each step from previous macroscopic values
-        for (int k=0; k<q_; k++){
-            for (int i=0; i<lx_; i++){
-                for (int j=0; j<ly_; j++){
+        for (int k = 0; k < q_; k++){
+            for (int i = 0; i < lx_; i++){
+                for (int j = 0; j < ly_; j++){
                     cu_[i][j] = 3.0*(cx_[k]*Ux_[i][j] + cy_[k]*Uy_[i][j]);
                     fEq_[k][i][j] = rho_[i][j] * w_[k] * (1.0 + cu_[i][j] + 
                     0.5 * pow(cu_[i][j],2.0) - 1.5 * (pow(Ux_[i][j], 2.0) + 
@@ -146,20 +146,22 @@ int main(int, char**) {
         }
 
         // No BCs yet. Only collision and streaming for a disturbance in a large field.
-        for (int i = 0; i < q_; i++) {
-            for (int j = 0; j < lx_; j++) {
-                for (int k = 0; k < ly_; k++) {
-                    fStar_[i][j][k] = f_[i][j][k] - omega_*(f_[i][j][k] - fEq_[i][j][k]);
+        for (int k = 0; k < q_; k++) {
+            for (int i = 0; i < lx_; i++) {
+                for (int j = 0; j < ly_; j++) {
+                    fStar_[k][i][j] = f_[k][i][j] - omega_*(f_[k][i][j] - fEq_[k][i][j]);
                 }
-
-int cx_[q_] = {0,   1,  0, -1,  0,    1,  -1,  -1,   1};
-int cy_[q_] = {0,   0,  1,  0, -1,    1,   1,  -1,  -1};
-
-                f_[1][i+1][j] = fStar_[1][i][j]; 
             }
         }
 
-
+        // Streaming for a disturbance in a large field.
+        for (int k = 0; k < q_; k++) {
+            for (int i = 1; i < lx_ - 1; i++) {
+                for (int j = 1; j < ly_ - 1; j++) {
+                    f_[k][i + cx_[k]][j + cy_[k]] = fStar_[k][i][j];
+                }
+            }
+        }
     }  
         
     delete[] f_;
