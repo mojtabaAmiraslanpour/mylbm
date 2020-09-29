@@ -1,6 +1,7 @@
 #include <iostream>
 #include "src/grid.h"
 #include "src/problem.h"
+#include <math.h>
 
 // GENERAL FLOW CONSTANTS
 const int q_ = 9;
@@ -21,6 +22,7 @@ double w_[q_]  = {4.0/9.0, 1.0/9.0, 1.0/9.0, 1.0/9.0, 1.0/9.0,
  1.0/36, 1.0/36, 1.0/36, 1.0/36}; // Weights
 int cx_[q_] = {0,   1,  0, -1,  0,    1,  -1,  -1,   1};
 int cy_[q_] = {0,   0,  1,  0, -1,    1,   1,  -1,  -1};
+
 
 int main(int, char**) {
 
@@ -69,6 +71,41 @@ int main(int, char**) {
         }
     }
 
+    // Defining population array fStar(q,lx,ly)
+    double*** fStar_;
+    fStar_ = new double** [q_];
+    for (int i = 0; i < q_; i++) {
+        fStar_[i] = new double* [lx_];
+        for (int j = 0; j < lx_; j++) {
+            fStar_[i][j] = new double[ly_];
+            for (int k = 0; k < ly_; k++) {
+                fStar_[i][j][k] = 0;
+            }
+        }
+    }
+
+    // Defining population array fEq(q,lx,ly)
+    double*** fEq_;
+    fEq_ = new double** [q_];
+    for (int i = 0; i < q_; i++) {
+        fEq_[i] = new double* [lx_];
+        for (int j = 0; j < lx_; j++) {
+            fEq_[i][j] = new double[ly_];
+            for (int k = 0; k < ly_; k++) {
+                fEq_[i][j][k] = 0;
+            }
+        }
+    }
+
+    // Defining c * u
+    double** cu_ = new double*[lx_];
+    for (int i=0; i<lx_; i++){
+        cu_[i] = new double[ly_];
+        for (int j=0; j<ly_; j++){
+            cu_[i][j] = 0;
+        }
+    }
+
     // Creating the mesh
     grid mesh_(lx_, ly_);
 
@@ -81,26 +118,57 @@ int main(int, char**) {
     // Main loop
     for (int iter = 0; iter < iter_; iter++) {
 
-            // Computing macroscopic variables with f_
-            for (int i = 0; i < lx_; i++) {
-                for (int j = 0; j < ly_; j++) {
-                    rho_[i][j] = f_[0][i][j] + f_[1][i][j] + f_[2][i][j] + 
-                                 f_[3][i][j] + f_[4][i][j] + f_[5][i][j] +
-                                 f_[6][i][j] + f_[7][i][j] + f_[8][i][j];
+        // Computing macroscopic variables with f_
+        for (int i = 0; i < lx_; i++) {
+            for (int j = 0; j < ly_; j++) {
+                rho_[i][j] = f_[0][i][j] + f_[1][i][j] + f_[2][i][j] + 
+                                f_[3][i][j] + f_[4][i][j] + f_[5][i][j] +
+                                f_[6][i][j] + f_[7][i][j] + f_[8][i][j];
 
-                    Ux_[i][j] = ((f_[0][i][j] + f_[4][i][j] + f_[7][i][j]) -
-                                 (f_[2][i][j] + f_[5][i][j] + f_[6][i][j])) / rho_[i][j];
+                Ux_[i][j] = ((f_[0][i][j] + f_[4][i][j] + f_[7][i][j]) -
+                                (f_[2][i][j] + f_[5][i][j] + f_[6][i][j])) / rho_[i][j];
 
-                    Uy_[i][j] = ((f_[1][i][j] + f_[4][i][j] + f_[5][i][j]) -
-                                 (f_[3][i][j] + f_[6][i][j] + f_[7][i][j])) / rho_[i][j];
+                Uy_[i][j] = ((f_[1][i][j] + f_[4][i][j] + f_[5][i][j]) -
+                                (f_[3][i][j] + f_[6][i][j] + f_[7][i][j])) / rho_[i][j];
+            }
+        }
+
+        // Computing cu and fEq in each step from previous macroscopic values
+        for (int k=0; k<q_; k++){
+            for (int i=0; i<lx_; i++){
+                for (int j=0; j<ly_; j++){
+                    cu_[i][j] = 3.0*(cx_[k]*Ux_[i][j] + cy_[k]*Uy_[i][j]);
+                    fEq_[k][i][j] = rho_[i][j] * w_[k] * (1.0 + cu_[i][j] + 
+                    0.5 * pow(cu_[i][j],2.0) - 1.5 * (pow(Ux_[i][j], 2.0) + 
+                    pow(Uy_[i][j], 2.0)));
                 }
             }
+        }
 
-            // No BCs yet. Only collision and streaming for a disturbance in a large field.
-        }  
+        // No BCs yet. Only collision and streaming for a disturbance in a large field.
+        for (int i = 0; i < q_; i++) {
+            for (int j = 0; j < lx_; j++) {
+                for (int k = 0; k < ly_; k++) {
+                    fStar_[i][j][k] = f_[i][j][k] - omega_*(f_[i][j][k] - fEq_[i][j][k]);
+                }
+
+int cx_[q_] = {0,   1,  0, -1,  0,    1,  -1,  -1,   1};
+int cy_[q_] = {0,   0,  1,  0, -1,    1,   1,  -1,  -1};
+
+                f_[1][i+1][j] = fStar_[1][i][j]; 
+            }
+        }
+
+
+    }  
         
-
     delete[] f_;
+    delete[] fStar_;
+    delete[] fEq_;
+    delete[] rho_;
+    delete[] Ux_;
+    delete[] Uy_;
+    delete[] cu_;
 
     return 0;
 };

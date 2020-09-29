@@ -1,0 +1,26 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/mojtaba/Desktop/MyCode/mylbm/src/grid.h
+iostream
+-
+
+/home/mojtaba/Desktop/MyCode/mylbm/src/problem.cpp
+problem.h
+/home/mojtaba/Desktop/MyCode/mylbm/src/problem.h
+grid.h
+/home/mojtaba/Desktop/MyCode/mylbm/src/grid.h
+math.h
+-
+
+/home/mojtaba/Desktop/MyCode/mylbm/src/problem.h
+iostream
+-
+grid.h
+/home/mojtaba/Desktop/MyCode/mylbm/src/grid.h
+
