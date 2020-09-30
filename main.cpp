@@ -14,8 +14,8 @@ double Re_ = 100; // Reynolds number
 double uMax_ = 0.1; // maximum velocity of Poiseuille inflow
 double nu_ = uMax_ * 2. * radius_ / Re_; // kinematic viscosity
 double omega_ = 1. / (3 * nu_+1./2.); // relaxation parameter, assuming deltaT = 1 so C_s = 1/3 p.117
-int iter_ = 400; // total number of iterations
-int tPlot_ = 50; // cycles
+int iter_ = 2; // total number of iterations
+int tPlot_ = 1; // cycles
 
 // Using D2Q9
 double w_[q_]  = {4.0/9.0, 1.0/9.0, 1.0/9.0, 1.0/9.0, 1.0/9.0,
@@ -45,7 +45,7 @@ int main(int, char**) {
         for (int j = 0; j < ly_; j++) {
             y_ = j - 0.5;
             Ux_[i][j] = 4. * uMax_ / (L * L) * (L * y_ - y_ * y_);
-            cout << i <<"   "<< j <<"   "<< Ux_[i][j] << endl;
+            //cout << i <<"   "<< j <<"   "<< Ux_[i][j] << endl;
         }
     }
 
@@ -125,14 +125,18 @@ int main(int, char**) {
                                 f_[3][i][j] + f_[4][i][j] + f_[5][i][j] +
                                 f_[6][i][j] + f_[7][i][j] + f_[8][i][j];
 
-                Ux_[i][j] = ((f_[0][i][j] + f_[4][i][j] + f_[7][i][j]) -
-                                (f_[2][i][j] + f_[5][i][j] + f_[6][i][j])) / rho_[i][j];
-
-                Uy_[i][j] = ((f_[1][i][j] + f_[4][i][j] + f_[5][i][j]) -
+                Ux_[i][j] = ((f_[1][i][j] + f_[5][i][j] + f_[8][i][j]) -
                                 (f_[3][i][j] + f_[6][i][j] + f_[7][i][j])) / rho_[i][j];
+
+                Uy_[i][j] = ((f_[2][i][j] + f_[5][i][j] + f_[6][i][j]) -
+                                (f_[4][i][j] + f_[7][i][j] + f_[8][i][j])) / rho_[i][j];
             }
         }
 
+        if (iter % tPlot_ == 0) {
+            cylinder.writeVTK(rho_, Ux_, Uy_, iter);
+        }
+        
         // Computing cu and fEq in each step from previous macroscopic values
         for (int k = 0; k < q_; k++){
             for (int i = 0; i < lx_; i++){
@@ -162,7 +166,7 @@ int main(int, char**) {
                 }
             }
         }
-    }  
+    }
         
     delete[] f_;
     delete[] fStar_;

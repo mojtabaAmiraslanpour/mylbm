@@ -3,6 +3,8 @@
 
 #include <iostream>
 #include "grid.h"
+#include <fstream>
+#include <math.h>
 
 using namespace std;
 
@@ -21,6 +23,8 @@ public:
 
     int initialize(const double uMax__, double*** f__, double** rho__, double** Ux__, double** Uy__,
 const double* w__, const int* cx__, const int* cy__);
+
+    int writeVTK(double** rho__, double** Ux__, double** Uy__, int iter__);
 
 };
 

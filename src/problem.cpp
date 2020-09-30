@@ -1,6 +1,8 @@
 #include "problem.h"
-#include "grid.h"
-#include <math.h>
+#include <iostream>
+#include <sstream>
+using namespace std;
+
 
 // Constructor
 problem::problem(const grid& mesh__, int q__):
@@ -9,9 +11,6 @@ ly(mesh__.ly),
 q(q__)
 {
     cout << "This is problem constructor.\n";
-    // for (int k=0; k<q; k++){
-    //     cout << w[k] << endl;
-    // }
 }
 
 // Destructor
@@ -44,6 +43,39 @@ const double* w__, const int* cx__, const int* cy__)
             }
         }
     }
+
+    return 0;
+}
+
+int problem::writeVTK(double** rho__, double** Ux__, double** Uy__, int iter__) {
+
+    string iter_str;
+    stringstream transfer;
+    transfer << iter__;
+    transfer >> iter_str;
+
+    ofstream UxResults;
+    UxResults.open("file_no_" + iter_str + ".vtk");
+    UxResults
+        << "# vtk DataFile Version 3.0\n"
+        << "first dataset\n"
+        << "ASCII\n"
+        << "DATASET STRUCTURED_POINTS\n";
+    UxResults << "DIMENSIONS " << lx << " " << ly << " 1\n";
+    UxResults << "ORIGIN 0 0 0\n"
+        << "SPACING 1 1 0\n";
+    UxResults << "POINT_DATA " << lx * ly << endl;
+    UxResults << "SCALARS U(x) float\n"
+        << "LOOKUP_TABLE default\n";
+
+    for (int j = 0; j < ly; j++) {
+        for (int i = 0; i < lx; i++) {
+            UxResults << Ux__[i][j] << " ";
+        }
+        UxResults << endl;
+    }
+
+    UxResults.close();
 
     return 0;
 }
