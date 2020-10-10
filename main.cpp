@@ -132,10 +132,6 @@ int main(int, char**) {
                                 (f_[4][i][j] + f_[7][i][j] + f_[8][i][j])) / rho_[i][j];
             }
         }
-
-        if (iter % tPlot_ == 0) {
-            cylinder.writeVTK(rho_, Ux_, Uy_, iter);
-        }
         
         // Computing cu and fEq in each step from previous macroscopic values
         for (int k = 0; k < q_; k++){
@@ -149,7 +145,11 @@ int main(int, char**) {
             }
         }
 
-        // No BCs yet. Only collision and streaming for a disturbance in a large field.
+        if (iter % tPlot_ == 0) {
+            cylinder.writeVTK(rho_, Ux_, Uy_, iter);
+        }
+
+        // Collision
         for (int k = 0; k < q_; k++) {
             for (int i = 0; i < lx_; i++) {
                 for (int j = 0; j < ly_; j++) {
@@ -158,7 +158,7 @@ int main(int, char**) {
             }
         }
 
-        // Streaming for a disturbance in a large field.
+        // Streaming of the fluid nodes
         for (int k = 0; k < q_; k++) {
             for (int i = 1; i < lx_ - 1; i++) {
                 for (int j = 1; j < ly_ - 1; j++) {
@@ -166,6 +166,86 @@ int main(int, char**) {
                 }
             }
         }
+
+        // Lower wall boundary bounce back streaming
+        for (int k = 0; k < q_; k++) {
+            for (int i = 1; i < lx_ - 1; i++) {
+                f_[0][i][0] = fStar_[0][i][0]; // form the node itself
+                f_[1][i + 1][0] = fStar_[1][i][0]; // from neighbour boundary node
+                f_[3][i - 1][0] = fStar_[3][i][0]; // from neighbour boundary node
+
+                f_[2][i][0] = fStar_[4][i][0]; // bounce back
+                f_[5][i][0] = fStar_[7][i][0]; // bounce back
+                f_[6][i][0] = fStar_[8][i][0]; // bounce back
+
+                // f4 f7 f8 are already filled when j = 1  in the main streaming step
+
+                // for j = 0
+                //f_[0][i + 0][0] = fStar_[0][i][0];
+                //f_[1][i + 1][0] = fStar_[1][i][0];
+                //f_[2][i + 0][1] = fStar_[2][i][0];
+                //f_[3][i - 1][0] = fStar_[3][i][0];
+                //f_[4][i + 0][-1] = fStar_[4][i][0];
+                //f_[5][i + 1][1] = fStar_[5][i][0];
+                //f_[6][i - 1][1] = fStar_[6][i][0];
+                //f_[7][i - 1][-1] = fStar_[7][i][0];
+                //f_[8][i + 1][-1] = fStar_[8][i][0];
+
+                // for j = 1
+                //f_[0][i + 0][1] = fStar_[0][i][1];
+                //f_[1][i + 1][1] = fStar_[1][i][1];
+                //f_[2][i + 0][2] = fStar_[2][i][1];
+                //f_[3][i - 1][1] = fStar_[3][i][1];
+                //f_[4][i + 0][0] = fStar_[4][i][1];
+                //f_[5][i + 1][2] = fStar_[5][i][1];
+                //f_[6][i - 1][3] = fStar_[6][i][1];
+                //f_[7][i - 1][0] = fStar_[7][i][1];
+                //f_[8][i + 1][0] = fStar_[8][i][1];
+            }
+        }
+        
+        // Upper wall boundary bounce back streaming
+        for (int k = 0; k < q_; k++) {
+            for (int i = 1; i < lx_ - 1; i++) {
+
+                f_[0][i][0] = fStar_[0][i][0]; // form the node itself
+                f_[1][i + 1][0] = fStar_[1][i][0]; // from neighbour boundary node
+                f_[3][i - 1][0] = fStar_[3][i][0]; // from neighbour boundary node
+
+                f_[4][i][ly_] = fStar_[2][i][ly_];
+                f_[7][i][ly_] = fStar_[5][i][ly_];
+                f_[8][i][ly_] = fStar_[6][i][ly_];
+
+                // f2 f5 f6 are already filled when j = 1  in the main streaming step
+            }
+        }
+
+        // See if populated
+        if (iter = iter_) {
+            int p;
+            for (int k = 0; k < q_; k++) {
+                cout << "k = " << k << endl;
+
+                for (int j = 0; j < ly_; j++) {
+
+                    for (int i = 0; i < lx_; i++) {
+
+                        if (f_[k][i][j] != 0) {
+                            p = 1;
+                        }
+                        else
+                        {
+                            p = 0;
+                        }
+
+                        cout << p << "," << f_[k][i][j] << " ";
+                    }
+
+                    cout << "\n";
+                }
+                cout << "\n";
+            }
+        } 
     }
         
     delete[] f_;
