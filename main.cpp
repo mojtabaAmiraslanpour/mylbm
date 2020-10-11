@@ -167,66 +167,61 @@ int main(int, char**) {
             }
         }
 
+        //BCs
+        // f_[0][i + 0][j + 0] = fStar_[0][i][j];
+        // f_[1][i + 1][j + 0] = fStar_[1][i][j];
+        // f_[2][i + 0][j + 1] = fStar_[2][i][j];
+        // f_[3][i - 1][j + 0] = fStar_[3][i][j];
+        // f_[4][i + 0][j - 1] = fStar_[4][i][j];
+        // f_[5][i + 1][j + 1] = fStar_[5][i][j];
+        // f_[6][i - 1][j + 1] = fStar_[6][i][j];
+        // f_[7][i - 1][j - 1] = fStar_[7][i][j];
+        // f_[8][i + 1][j - 1] = fStar_[8][i][j];
+        // In streaming we are sending populations to the neighbour nodes
+        // so they can be used later in the collision step. So for the boundary nodes
+        // you have to send populations to the neighbouring cells as normal. But there
+        // is note that boundary nodes themselves wont have all the populations in the 
+        // next collision step. Actually they are sending some populations beyond the
+        // boundary. These populations will bounce back to themseleves which will be used
+        // in the next collision step.
+
         // Lower wall boundary bounce back streaming
-        for (int k = 0; k < q_; k++) {
-            for (int i = 1; i < lx_ - 1; i++) {
-                f_[0][i][0] = fStar_[0][i][0]; // form the node itself
-                f_[1][i + 1][0] = fStar_[1][i][0]; // from neighbour boundary node
-                f_[3][i - 1][0] = fStar_[3][i][0]; // from neighbour boundary node
-
-                f_[2][i][0] = fStar_[4][i][0]; // bounce back
-                f_[5][i][0] = fStar_[7][i][0]; // bounce back
-                f_[6][i][0] = fStar_[8][i][0]; // bounce back
-
-                // f4 f7 f8 are already filled when j = 1  in the main streaming step
-
-                // for j = 0
-                //f_[0][i + 0][0] = fStar_[0][i][0];
-                //f_[1][i + 1][0] = fStar_[1][i][0];
-                //f_[2][i + 0][1] = fStar_[2][i][0];
-                //f_[3][i - 1][0] = fStar_[3][i][0];
-                //f_[4][i + 0][-1] = fStar_[4][i][0];
-                //f_[5][i + 1][1] = fStar_[5][i][0];
-                //f_[6][i - 1][1] = fStar_[6][i][0];
-                //f_[7][i - 1][-1] = fStar_[7][i][0];
-                //f_[8][i + 1][-1] = fStar_[8][i][0];
-
-                // for j = 1
-                //f_[0][i + 0][1] = fStar_[0][i][1];
-                //f_[1][i + 1][1] = fStar_[1][i][1];
-                //f_[2][i + 0][2] = fStar_[2][i][1];
-                //f_[3][i - 1][1] = fStar_[3][i][1];
-                //f_[4][i + 0][0] = fStar_[4][i][1];
-                //f_[5][i + 1][2] = fStar_[5][i][1];
-                //f_[6][i - 1][3] = fStar_[6][i][1];
-                //f_[7][i - 1][0] = fStar_[7][i][1];
-                //f_[8][i + 1][0] = fStar_[8][i][1];
-            }
+        for (int i = 1; i < lx_ - 1; i++) {
+            f_[0][i][0] = fStar_[0][i][0]; // form the node itself
+            f_[1][i + 1][0] = fStar_[1][i][0]; // from neighbour boundary node
+            f_[2][i][1] = fStar_[2][i][0]; // Upper fluid node
+            f_[3][i - 1][0] = fStar_[3][i][0]; // from neighbour boundary node
+            f_[2][i][0] = fStar_[4][i][0]; // bounce back
+            f_[5][i + 1][1] = fStar_[5][i][0]; // Upper fluid node
+            f_[6][i - 1][1] = fStar_[6][i][0]; // Upper fluid node
+            f_[5][i][0] = fStar_[7][i][0]; // bounce back
+            f_[6][i][0] = fStar_[8][i][0]; // bounce back
         }
         
         // Upper wall boundary bounce back streaming
-        for (int k = 0; k < q_; k++) {
-            for (int i = 1; i < lx_ - 1; i++) {
-
-                f_[0][i][0] = fStar_[0][i][0]; // form the node itself
-                f_[1][i + 1][0] = fStar_[1][i][0]; // from neighbour boundary node
-                f_[3][i - 1][0] = fStar_[3][i][0]; // from neighbour boundary node
-
-                f_[4][i][ly_] = fStar_[2][i][ly_];
-                f_[7][i][ly_] = fStar_[5][i][ly_];
-                f_[8][i][ly_] = fStar_[6][i][ly_];
-
-                // f2 f5 f6 are already filled when j = 1  in the main streaming step
-            }
+        for (int i = 1; i < lx_ - 1; i++) {
+            f_[0][i][ly_] = fStar_[0][i][ly_]; // form the node itself
+            f_[1][i + 1][ly_] = fStar_[1][i][ly_]; // from neighbour boundary node
+            f_[4][i][ly_] = fStar_[2][i][ly_]; // bounce back
+            f_[3][i - 1][ly_] = fStar_[3][i][ly_]; // from neighbour boundary node
+            f_[4][i][ly_ - 1] = fStar_[4][i][ly_]; // Lower fluid node
+            f_[7][i][ly_] = fStar_[5][i][ly_]; // bounce back
+            f_[8][i][ly_] = fStar_[6][i][ly_]; // bounce back
+            f_[7][i - 1][ly_ - 1] = fStar_[7][i][ly_]; // Lower fluid node
+            f_[8][i + 1][ly_ - 1] = fStar_[8][i][ly_]; // Lower fluid node
         }
 
         // Inlet vel BC
-        for (int k = 0; k < q_; k++) {
-            for (int i = 1; i < lx_ - 1; i++) {
-                for (int j = 1; j < ly_ - 1; j++) {
-                    f_[k][i + cx_[k]][j + cy_[k]] = fStar_[k][i][j];
-                }
-            }
+        for (int j = 1; j < ly_ - 1; j++) {
+            f_[0][0][j] = fStar_[0][0][j]; // form the node itself
+            f_[1][1][j] = fStar_[1][0][j]; // right fluid node
+            f_[2][0][j + 1] = fStar_[2][0][j]; // from neighbour boundary node
+            f_[1][0][j] = fStar_[3][0][j] - 2 * w_[3] * rho_[1][j] * (cx_[3] * Ux_[0][j] + cy_[3] * Uy_[0][j]); // inlet vel. bounce back
+            f_[4][0][j - 1] = fStar_[4][0][j]; // from neighbour boundary node
+            f_[5][1][j + 1] = fStar_[5][0][j]; // right fluid node
+            f_[8][0][j] = fStar_[6][0][j] - 2 * w_[6] * rho_[1][j] * (cx_[6] * Ux_[0][j] + cy_[6] * Uy_[0][j]); // inlet vel. bounce back
+            f_[5][0][j] = fStar_[7][0][j] - 2 * w_[7] * rho_[1][j] * (cx_[7] * Ux_[0][j] + cy_[7] * Uy_[0][j]); // inlet vel. bounce back
+            f_[8][1][j - 1] = fStar_[8][0][j]; // right fluid node
         }
 
         // See if populated
