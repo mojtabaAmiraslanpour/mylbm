@@ -220,6 +220,15 @@ int main(int, char**) {
             }
         }
 
+        // Inlet vel BC
+        for (int k = 0; k < q_; k++) {
+            for (int i = 1; i < lx_ - 1; i++) {
+                for (int j = 1; j < ly_ - 1; j++) {
+                    f_[k][i + cx_[k]][j + cy_[k]] = fStar_[k][i][j];
+                }
+            }
+        }
+
         // See if populated
         if (iter = iter_) {
             int p;
