@@ -224,6 +224,23 @@ int main(int, char**) {
             f_[8][1][j - 1] = fStar_[8][0][j]; // right fluid node
         }
 
+        
+        // Outlet zeroGrad vel
+        for (int j = 1; j < ly_ - 1; j++) {
+            //f_[0][lx_][j] = fStar_[0][lx_][j]; // form the node itself
+            //f_[1][lx_ + 1][j] = fStar_[1][lx_][j]; Replaced by:
+            //f_[3][lx_][j] = f_[3][lx_ - 1][j]; // 1st order extrapolation from the inner fluid node, A A Mohammad P.119
+            //f_[2][lx_][j + 1] = fStar_[2][lx_][j]; // from neighbour boundary node
+            //f_[3][lx_ - 1][j] = fStar_[3][lx_][j]; // left fluid node
+            //f_[4][lx_][j - 1] = fStar_[4][lx_][j]; // from neighbour boundary node
+            //f_[5][lx_ + 1][j + 1] = fStar_[5][lx_][j]; Replaced by:
+            //f_[7][lx_][j] = f_[7][lx_ - 1][j]; // 1st order extrapolation from the inner fluid node, A A Mohammad P.119
+            //f_[6][lx_ - 1][j + 1] = fStar_[6][lx_][j]; // left fluid node
+            //f_[7][lx_ - 1][j - 1] = fStar_[7][lx_][j]; // left fluid node
+            //f_[8][lx_ + 1][j - 1] = fStar_[8][lx_][j]; Replaced by :
+            //f_[6][lx_][j] = f_[6][lx_ - 1][j]; // 1st order extrapolation from the inner fluid node, A A Mohammad P.119
+        }
+
         // See if populated
         if (iter = iter_) {
             int p;
