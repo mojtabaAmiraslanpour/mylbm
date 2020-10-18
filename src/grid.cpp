@@ -15,7 +15,7 @@ ly(ly__)
         y[i] = i;
     }
 
-    cout << "This is grid constructor.\n";
+    //cout << "This is grid constructor.\n";
 
     delete[] x;
     delete[] y;

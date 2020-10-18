@@ -10,7 +10,7 @@ lx(mesh__.lx),
 ly(mesh__.ly),
 q(q__)
 {
-    cout << "This is problem constructor.\n";
+    //cout << "This is problem constructor.\n";
 }
 
 // Destructor
@@ -19,7 +19,7 @@ problem::~problem() {}
 int problem::initialize(const double uMax__, double*** f__, double** rho__, double** Ux__, double** Uy__,
 const double* w__, const int* cx__, const int* cy__)
 {
-    cout << "This is the initializer.\n";
+    //cout << "This is the initializer.\n";
 
     // Defining c * u
     double** cu = new double*[lx];
