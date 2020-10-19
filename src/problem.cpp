@@ -22,18 +22,18 @@ const double* w__, const int* cx__, const int* cy__)
     //cout << "This is the initializer.\n";
 
     // Defining c * u
-    double** cu = new double*[lx];
-    for (int i=0; i<lx; i++){
-        cu[i] = new double[ly];
-        for (int j=0; j<ly; j++){
+    double** cu = new double*[lx + 2];
+    for (int i=0; i<lx + 2; i++){
+        cu[i] = new double[ly + 2];
+        for (int j=0; j<ly + 2; j++){
             cu[i][j] = 0;
         }
     }
 
     // Initializing f (populating cu and f)
-    for (int k=0; k<q; k++){
-        for (int i=0; i<lx; i++){
-            for (int j=0; j<ly; j++){
+    for (int k=0; k < q; k++){
+        for (int i=1; i < lx + 1; i++){
+            for (int j=1; j < ly + 1; j++){
                 cu[i][j] = 3.0*(cx__[k]*Ux__[i][j] + cy__[k]*Uy__[i][j]);
                 f__[k][i][j] = rho__[i][j] * w__[k] * (1.0 + cu[i][j] + 
                 0.5 * pow(cu[i][j],2.0) - 1.5 * (pow(Ux__[i][j], 2.0) + 
@@ -68,8 +68,8 @@ int problem::writeVTK(double** rho__, double** Ux__, double** Uy__, int iter__) 
     UxResults << "SCALARS U(x) float\n"
         << "LOOKUP_TABLE default\n";
 
-    for (int j = 0; j < ly; j++) {
-        for (int i = 0; i < lx; i++) {
+    for (int j = 1; j < ly + 1; j++) {
+        for (int i = 1; i < lx + 1; i++) {
             UxResults << Ux__[i][j] << " ";
         }
         UxResults << endl;
