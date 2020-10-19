@@ -13,7 +13,7 @@ double radius_ = ly_/10+1; // radius of the cylinder
 double Re_ = 100; // Reynolds number
 double uMax_ = 0.1; // maximum velocity of Poiseuille inflow
 double nu_ = uMax_ * 2. * radius_ / Re_; // kinematic viscosity
-double omega_ = 1. / (3 * nu_+1./2.); // relaxation parameter, assuming deltaT = 1 so C_s = 1/3 p.117
+double omega_ = 1. / (3. * nu_ + 0.5); // relaxation parameter, assuming deltaT = 1 so C_s = 1/3 p.117
 int iter_ = 1000; // total number of iterations
 int tPlot_ = 10; // cycles
 
@@ -38,14 +38,13 @@ int main(int, char**) {
 
     // Defining Ux
     double y_;
-    int L = ly_-2;
+    int L = ly_ - 2;
     double** Ux_ = new double* [lx_ + 2];
     for (int i = 0; i < lx_ + 2; i++) {
         Ux_[i] = new double[ly_ + 2];
         for (int j = 0; j < ly_ + 2; j++) {
             y_ = j - 1.5;
             Ux_[i][j] = 4. * uMax_ / (L * L) * (L * y_ - y_ * y_);
-            //cout << i <<"   "<< j <<"   "<< Ux_[i][j] << endl;
         }
     }
 
@@ -138,8 +137,7 @@ int main(int, char**) {
             }
         }
 
-
-        //BCs
+        //Imposing BCs
         // f_[0][i + 0][j + 0] = fStar_[0][i][j];
         // f_[1][i + 1][j + 0] = fStar_[1][i][j];
         // f_[2][i + 0][j + 1] = fStar_[2][i][j];
@@ -157,93 +155,97 @@ int main(int, char**) {
         // boundary. These populations will bounce back to themseleves which will be used
         // in the next collision step.
 
-        // Lower wall boundary bounce back streaming
-        for (int i = 2; i < lx_; i++) {
-            f_[2][i][1] = fStar_[4][i][1]; // bounce back
-            f_[5][i][1] = fStar_[7][i][1]; // bounce back
-            f_[6][i][1] = fStar_[8][i][1]; // bounce back
-        }
-        
-        // Upper wall boundary bounce back streaming
-        for (int i = 2; i < lx_; i++) {
-            f_[4][i][ly_] = fStar_[2][i][ly_]; // bounce back
-            f_[7][i][ly_] = fStar_[5][i][ly_]; // bounce back
-            f_[8][i][ly_] = fStar_[6][i][ly_]; // bounce back
-        }
-
-        // Setting Macroscopic BCs
+        // Setting Macroscopic BCs for inlet outlet
         for (int j = 2; j < ly_; j++) {
             // Setting U & rho for inlet fixed velocity
             y_ = j - 1.5;
             Ux_[1][j] = 4. * uMax_ / (L * L) * (L * y_ - y_ * y_);
             Uy_[1][j] = 0;
             rho_[1][j] = 1.0 / (1 - Ux_[1][j])
-                       * ((f_[3][1][j] + f_[6][1][j] + f_[7][1][j])
-                       +  (f_[0][1][j] + f_[2][1][j] + f_[3][1][j]
-                       +   f_[4][1][j] + f_[6][1][j] + f_[7][1][j]));
-            
+                * ((f_[3][1][j] + f_[6][1][j] + f_[7][1][j])
+                    + (f_[0][1][j] + f_[2][1][j] + f_[3][1][j]
+                        + f_[4][1][j] + f_[6][1][j] + f_[7][1][j]));
+
             // Setting U & rho for outlet fixed pressure
             rho_[lx_][j] = 1.0;
             Ux_[lx_][j] = -1.0 + 1.0 / rho_[lx_][j]
-                            * ((f_[0][lx_][j] + f_[2][lx_][j] + f_[4][lx_][j])
-                            + 2 * (f_[1][lx_][j] + f_[5][lx_][j] + f_[8][lx_][j]));
+                * ((f_[0][lx_][j] + f_[2][lx_][j] + f_[4][lx_][j])
+                    + 2 * (f_[1][lx_][j] + f_[5][lx_][j] + f_[8][lx_][j]));
             Uy_[lx_][j] = 0;
         }
 
         // Inlet vel BC
         for (int j = 2; j < ly_; j++) {
-            f_[1][1][j] = f_[3][1][j] + (2.0/3.0) * rho_[1][j] * Ux_[1][j]; // inlet vel. bounce back
+            f_[1][1][j] = f_[3][1][j] + (2.0 / 3.0) * rho_[1][j] * Ux_[1][j]; // inlet vel. bounce back
             f_[8][1][j] = f_[6][1][j] + 0.5 * (f_[2][1][j] - f_[4][1][j])
-                        + (1.0/6.0) * rho_[1][j] * Ux_[1][j] - 0.5 * rho_[1][j] * Uy_[1][j]; // inlet vel. bounce back
+                + (1.0 / 6.0) * rho_[1][j] * Ux_[1][j] - 0.5 * rho_[1][j] * Uy_[1][j]; // inlet vel. bounce back
             f_[5][1][j] = f_[7][1][j] + 0.5 * (f_[4][1][j] - f_[2][1][j])
-                        + (1.0/6.0) * rho_[1][j] * Ux_[1][j] + 0.5 * rho_[1][j] * Uy_[1][j]; // inlet vel. bounce back
+                + (1.0 / 6.0) * rho_[1][j] * Ux_[1][j] + 0.5 * rho_[1][j] * Uy_[1][j]; // inlet vel. bounce back
         }
 
         // Outlet zeroGrad vel
         for (int j = 2; j < ly_; j++) {
-            f_[3][lx_][j] = f_[1][lx_][j] - 2.0/3.0 * rho_[lx_][j] * Ux_[lx_][j]; // Zou/He Pressure Boundary
+            f_[3][lx_][j] = f_[1][lx_][j] - 2.0 / 3.0 * rho_[lx_][j] * Ux_[lx_][j]; // Zou/He Pressure Boundary
             f_[7][lx_][j] = f_[5][lx_][j] + 0.5 * (f_[2][lx_][j] - f_[4][lx_][j])
-                        - (1.0/6.0) * rho_[lx_][j] * Ux_[lx_][j] - 0.5 * rho_[lx_][j] * Uy_[lx_][j]; // Zou/He Pressure Boundary
+                - (1.0 / 6.0) * rho_[lx_][j] * Ux_[lx_][j] - 0.5 * rho_[lx_][j] * Uy_[lx_][j]; // Zou/He Pressure Boundary
             f_[6][lx_][j] = f_[8][lx_][j] + 0.5 * (f_[4][lx_][j] - f_[2][lx_][j])
-                        - (1.0/6.0) * rho_[lx_][j] * Ux_[lx_][j] + 0.5 * rho_[lx_][j] * Uy_[lx_][j]; // Zou/He Pressure Boundary
+                - (1.0 / 6.0) * rho_[lx_][j] * Ux_[lx_][j] + 0.5 * rho_[lx_][j] * Uy_[lx_][j]; // Zou/He Pressure Boundary
         }
 
-        // // Inlet-Bottom corner
-        // f_[1][0][0] = fStar_[3][0][0] - 2 * w_[3] * rho_[1][0] * (cx_[3] * Ux_[0][0] + cy_[3] * Uy_[0][0]); // inlet vel. bounce back
-        // f_[2][0][0] = fStar_[4][0][0]; // Bounce back from lower wall
-        // f_[8][0][0] = fStar_[6][0][0] - 2 * w_[6] * rho_[1][0] * (cx_[6] * Ux_[0][0] + cy_[6] * Uy_[0][0]); // inlet vel. bounce back
-        // f_[5][0][0] = fStar_[7][0][0]; // Bounce back from lower wall
-        // f_[6][0][0] = fStar_[8][0][0]; // Bounce back from lower wall
+        // Lower wall boundary bounce back streaming
+        for (int i = 2; i < lx_; i++) {
+            f_[2][i][1] = f_[4][i][1]; // bounce back
+            f_[5][i][1] = f_[7][i][1]; // bounce back
+            f_[6][i][1] = f_[8][i][1]; // bounce back
+        }
 
-        // // Inlet-Top corner
-        // f_[1][0][ly_ - 1] = fStar_[3][0][ly_ - 1] - 2 * w_[3] * rho_[1][ly_ - 1] * (cx_[3] * Ux_[0][ly_ - 1] + cy_[3] * Uy_[0][ly_ - 1]); // inlet vel. bounce back
-        // f_[4][0][ly_ - 1] = fStar_[2][0][ly_ - 1]; // Bounce back from upper wall
-        // f_[5][0][ly_ - 1] = fStar_[7][0][ly_ - 1] - 2 * w_[7] * rho_[1][ly_ - 1] * (cx_[7] * Ux_[0][ly_ - 1] + cy_[7] * Uy_[0][ly_ - 1]); // inlet vel. bounce back
-        // f_[7][0][ly_ - 1] = fStar_[5][0][ly_ - 1]; // Bounce back from upper wall
-        // f_[8][0][ly_ - 1] = fStar_[6][0][ly_ - 1]; // Bounce back from upper wall
+        // Upper wall boundary bounce back streaming
+        for (int i = 2; i < lx_; i++) {
+            f_[4][i][ly_] = f_[2][i][ly_]; // bounce back
+            f_[7][i][ly_] = f_[5][i][ly_]; // bounce back
+            f_[8][i][ly_] = f_[6][i][ly_]; // bounce back
+        }
 
-        // // Outlet-Bottom corner
-        // f_[2][lx_ - 1][0] = fStar_[4][lx_ - 1][0]; // Bounce back from lower wall
-        // f_[3][lx_ - 1][0] = fStar_[3][lx_ - 2][0]; // 1st order extrapolation from the inner fluid node, A A Mohammad P.119
-        // f_[5][lx_ - 1][0] = fStar_[7][lx_ - 1][0]; // Bounce back from lower wall
-        // f_[6][lx_ - 1][0] = fStar_[8][lx_ - 1][0]; // Bounce back from lower wall
-        // f_[7][lx_ - 1][0] = fStar_[7][lx_ - 2][0]; // 1st order extrapolation from the inner fluid node, A A Mohammad P.119
+        // Inlet-Bottom corner
+        f_[6][1][1] = -0.5 * (f_[0][1][1] + 2 * (f_[1][1][1] + f_[2][1][1] + f_[5][1][1]));
+        f_[8][1][1] = f_[6][1][1];
+        f_[1][1][1] = f_[3][1][1];
+        f_[2][1][1] = f_[4][1][1];
+        f_[5][1][1] = f_[7][1][1];
+
+        // Inlet-Top corner
+        f_[5][1][ly_] = -0.5 * (f_[0][1][ly_] + 2 * (f_[1][1][ly_] + f_[4][1][ly_] + f_[8][1][ly_]));
+        f_[7][1][ly_] = f_[5][1][ly_];
+        f_[1][1][ly_] = f_[3][1][ly_];
+        f_[4][1][ly_] = f_[2][1][ly_];
+        f_[8][1][ly_] = f_[6][1][ly_];
+
+        // Outlet-Bottom corner
+        f_[5][1][ly_] = -0.5 * (f_[0][1][ly_] + 2 * (f_[2][1][ly_] + f_[3][1][ly_] + f_[6][1][ly_]));
+        f_[7][1][ly_] = f_[5][1][ly_];
+        f_[3][1][ly_] = f_[1][1][ly_];
+        f_[2][1][ly_] = f_[4][1][ly_];
+        f_[6][1][ly_] = f_[8][1][ly_];
+
 
         // // Outlet-Top corner
-        // f_[3][lx_ - 1][ly_ - 1] = fStar_[3][lx_ - 2][ly_ - 1]; // 1st order extrapolation from the inner fluid node, A A Mohammad P.119
-        // f_[4][lx_ - 1][ly_ - 1] = fStar_[2][lx_ - 1][ly_ - 1]; // Bounce back from upper wall
-        // f_[6][lx_ - 1][ly_ - 1] = fStar_[6][lx_ - 2][ly_ - 1]; // 1st order extrapolation from the inner fluid node, A A Mohammad P.119
-        // f_[7][lx_ - 1][ly_ - 1] = fStar_[5][lx_ - 1][ly_ - 1]; // Bounce back from upper wall
-        // f_[8][lx_ - 1][ly_ - 1] = fStar_[6][lx_ - 1][ly_ - 1]; // Bounce back from upper wall
-        
-        // Computing cu and fEq in each step & Collision
+        f_[6][1][ly_] = -0.5 * (f_[0][1][ly_] + 2 * (f_[3][1][ly_] + f_[4][1][ly_] + f_[7][1][ly_]));
+        f_[8][1][ly_] = f_[6][1][ly_];
+        f_[3][1][ly_] = f_[1][1][ly_];
+        f_[4][1][ly_] = f_[2][1][ly_];
+        f_[7][1][ly_] = f_[5][1][ly_];
+
+        // Collision
         for (int k = 0; k < q_; k++) {
             for (int i = 1; i < lx_ + 1; i++) {
                 for (int j = 1; j < ly_ + 1; j++) {
+
                     cu_[i][j] = 3.0*(cx_[k]*Ux_[i][j] + cy_[k]*Uy_[i][j]);
+
                     fEq_[k][i][j] = rho_[i][j] * w_[k] * (1.0 + cu_[i][j] + 
                     0.5 * pow(cu_[i][j],2.0) - 1.5 * (pow(Ux_[i][j], 2.0) + 
                     pow(Uy_[i][j], 2.0)));
+
                     fStar_[k][i][j] = f_[k][i][j] - omega_*(f_[k][i][j] - fEq_[k][i][j]);
                 }
             }
