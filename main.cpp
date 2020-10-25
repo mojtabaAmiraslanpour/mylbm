@@ -7,14 +7,14 @@
 const int q_ = 9;
 const int lx_ = 100; // number of cells in x-direction
 const int ly_ = 50; // number of cells in y-direction
-double pos_x_ = lx_/5; // position of the cylinder; (exact
-double pos_y_ = ly_/2+3; // y-symmetry is avoided)
-double radius_ = ly_/10+1; // radius of the cylinder
+double pos_x_ = lx_/5.; // position of the cylinder; (exact
+double pos_y_ = ly_/2. + 3; // y-symmetry is avoided)
+double radius_ = ly_/10. + 1; // radius of the cylinder
 double Re_ = 100; // Reynolds number
 double uMax_ = 0.1; // maximum velocity of Poiseuille inflow
 double nu_ = uMax_ * 2. * radius_ / Re_; // kinematic viscosity
 double omega_ = 1. / (3. * nu_ + 0.5); // relaxation parameter, assuming deltaT = 1 so C_s = 1/3 p.117
-int iter_ = 1000; // total number of iterations
+int iter_ = 2000; // total number of iterations
 int tPlot_ = 10; // cycles
 
 // Using D2Q9
@@ -26,84 +26,7 @@ int cy_[q_] = {0,   0,  1,  0, -1,    1,   1,  -1,  -1};
 
 int main(int, char**) {
 
-    // Initial conditions with macroscopic values
-    // Defining rho
-    double** rho_ = new double* [lx_ + 2];
-    for (int i = 0; i < lx_ + 2; i++) {
-        rho_[i] = new double[ly_ + 2];
-        for (int j = 0; j < ly_ + 2; j++) {
-            rho_[i][j] = 1.0;
-        }
-    }
-
-    // Defining Ux
-    double y_;
-    int L = ly_ - 2;
-    double** Ux_ = new double* [lx_ + 2];
-    for (int i = 0; i < lx_ + 2; i++) {
-        Ux_[i] = new double[ly_ + 2];
-        for (int j = 0; j < ly_ + 2; j++) {
-            y_ = j - 1.5;
-            Ux_[i][j] = 4. * uMax_ / (L * L) * (L * y_ - y_ * y_);
-        }
-    }
-
-    // Defining Uy
-    double** Uy_ = new double* [lx_ + 2];
-    for (int i = 0; i < lx_ + 2; i++) {
-        Uy_[i] = new double[ly_ + 2];
-        for (int j = 0; j < ly_ + 2; j++) {
-            Uy_[i][j] = 0;
-        }
-    }
-
-    // Defining population array f(q,lx,ly)
-    double*** f_;
-    f_ = new double** [q_];
-    for (int k = 0; k < q_; k++) {
-        f_[k] = new double* [lx_ + 2];
-        for (int i = 0; i < lx_ + 2; i++) {
-            f_[k][i] = new double[ly_ + 2];
-            for (int j = 0; j < ly_ + 2; j++) {
-                f_[k][i][j] = 0;
-            }
-        }
-    }
-
-    // Defining population array fStar(q,lx,ly)
-    double*** fStar_;
-    fStar_ = new double** [q_];
-    for (int k = 0; k < q_; k++) {
-        fStar_[k] = new double* [lx_ + 2];
-        for (int i = 0; i < lx_ + 2; i++) {
-            fStar_[k][i] = new double[ly_ + 2];
-            for (int j = 0; j < ly_ + 2; j++) {
-                fStar_[k][i][j] = 0;
-            }
-        }
-    }
-
-    // Defining population array fEq(q,lx,ly)
-    double*** fEq_;
-    fEq_ = new double** [q_];
-    for (int k = 0; k < q_; k++) {
-        fEq_[k] = new double* [lx_ + 2];
-        for (int i = 0; i < lx_ + 2; i++) {
-            fEq_[k][i] = new double[ly_ + 2];
-            for (int j = 0; j < ly_ + 2; j++) {
-                fEq_[k][i][j] = 0;
-            }
-        }
-    }
-
-    // Defining c * u
-    double** cu_ = new double* [lx_ + 2];
-    for (int i=0; i<lx_ + 2; i++){
-        cu_[i] = new double[ly_ + 2];
-        for (int j=0; j<ly_ + 2; j++){
-            cu_[i][j] = 0;
-        }
-    }
+    #include "createArrays.h"
 
     // Creating the mesh
     grid mesh_(lx_, ly_);
@@ -192,49 +115,6 @@ int main(int, char**) {
                 - (1.0 / 6.0) * rho_[lx_][j] * Ux_[lx_][j] + 0.5 * rho_[lx_][j] * Uy_[lx_][j]; // Zou/He Pressure Boundary
         }
 
-        // Lower wall boundary bounce back streaming
-        for (int i = 2; i < lx_; i++) {
-            f_[2][i][1] = f_[4][i][1]; // bounce back
-            f_[5][i][1] = f_[7][i][1]; // bounce back
-            f_[6][i][1] = f_[8][i][1]; // bounce back
-        }
-
-        // Upper wall boundary bounce back streaming
-        for (int i = 2; i < lx_; i++) {
-            f_[4][i][ly_] = f_[2][i][ly_]; // bounce back
-            f_[7][i][ly_] = f_[5][i][ly_]; // bounce back
-            f_[8][i][ly_] = f_[6][i][ly_]; // bounce back
-        }
-
-        // Inlet-Bottom corner
-        f_[6][1][1] = -0.5 * (f_[0][1][1] + 2 * (f_[1][1][1] + f_[2][1][1] + f_[5][1][1]));
-        f_[8][1][1] = f_[6][1][1];
-        f_[1][1][1] = f_[3][1][1];
-        f_[2][1][1] = f_[4][1][1];
-        f_[5][1][1] = f_[7][1][1];
-
-        // Inlet-Top corner
-        f_[5][1][ly_] = -0.5 * (f_[0][1][ly_] + 2 * (f_[1][1][ly_] + f_[4][1][ly_] + f_[8][1][ly_]));
-        f_[7][1][ly_] = f_[5][1][ly_];
-        f_[1][1][ly_] = f_[3][1][ly_];
-        f_[4][1][ly_] = f_[2][1][ly_];
-        f_[8][1][ly_] = f_[6][1][ly_];
-
-        // Outlet-Bottom corner
-        f_[5][1][ly_] = -0.5 * (f_[0][1][ly_] + 2 * (f_[2][1][ly_] + f_[3][1][ly_] + f_[6][1][ly_]));
-        f_[7][1][ly_] = f_[5][1][ly_];
-        f_[3][1][ly_] = f_[1][1][ly_];
-        f_[2][1][ly_] = f_[4][1][ly_];
-        f_[6][1][ly_] = f_[8][1][ly_];
-
-
-        // // Outlet-Top corner
-        f_[6][1][ly_] = -0.5 * (f_[0][1][ly_] + 2 * (f_[3][1][ly_] + f_[4][1][ly_] + f_[7][1][ly_]));
-        f_[8][1][ly_] = f_[6][1][ly_];
-        f_[3][1][ly_] = f_[1][1][ly_];
-        f_[4][1][ly_] = f_[2][1][ly_];
-        f_[7][1][ly_] = f_[5][1][ly_];
-
         // Collision
         for (int k = 0; k < q_; k++) {
             for (int i = 1; i < lx_ + 1; i++) {
@@ -251,16 +131,59 @@ int main(int, char**) {
             }
         }
 
-            // // Check values
-            // //for (int k = 0; k < q_; k++) {
-            //     //cout << "k = " << k << endl;
-            //     for (int j = 2; j < ly_; j++) {
-            //         //for (int i = 0; i < lx_; i++) {
-            //             cout << fStar_[4][1][j] << " ";
-            //         //}
-            //         cout << "\n";
-            //     }
-            // //}
+        // Lower wall boundary bounce back streaming
+        for (int i = 1; i < lx_ + 1; i++) {
+            fStar_[2][i][1] = f_[4][i][1]; // bounce back
+            fStar_[5][i][1] = f_[7][i][1]; // bounce back
+            fStar_[6][i][1] = f_[8][i][1]; // bounce back
+        }
+
+        // Upper wall boundary bounce back streaming
+        for (int i = 1; i < lx_ + 1; i++) {
+            fStar_[4][i][ly_] = f_[2][i][ly_]; // bounce back
+            fStar_[7][i][ly_] = f_[5][i][ly_]; // bounce back
+            fStar_[8][i][ly_] = f_[6][i][ly_]; // bounce back
+        }
+
+        // // Inlet-Bottom corner
+        // f_[6][1][1] = -0.5 * (f_[0][1][1] + 2 * (f_[1][1][1] + f_[2][1][1] + f_[5][1][1]));
+        // f_[8][1][1] = f_[6][1][1];
+        // f_[1][1][1] = f_[3][1][1];
+        // f_[2][1][1] = f_[4][1][1];
+        // f_[5][1][1] = f_[7][1][1];
+
+        // // Inlet-Top corner
+        // f_[5][1][ly_] = -0.5 * (f_[0][1][ly_] + 2 * (f_[1][1][ly_] + f_[4][1][ly_] + f_[8][1][ly_]));
+        // f_[7][1][ly_] = f_[5][1][ly_];
+        // f_[1][1][ly_] = f_[3][1][ly_];
+        // f_[4][1][ly_] = f_[2][1][ly_];
+        // f_[8][1][ly_] = f_[6][1][ly_];
+
+        // // Outlet-Bottom corner
+        // f_[5][1][ly_] = -0.5 * (f_[0][1][ly_] + 2 * (f_[2][1][ly_] + f_[3][1][ly_] + f_[6][1][ly_]));
+        // f_[7][1][ly_] = f_[5][1][ly_];
+        // f_[3][1][ly_] = f_[1][1][ly_];
+        // f_[2][1][ly_] = f_[4][1][ly_];
+        // f_[6][1][ly_] = f_[8][1][ly_];
+
+
+        // // // Outlet-Top corner
+        // f_[6][1][ly_] = -0.5 * (f_[0][1][ly_] + 2 * (f_[3][1][ly_] + f_[4][1][ly_] + f_[7][1][ly_]));
+        // f_[8][1][ly_] = f_[6][1][ly_];
+        // f_[3][1][ly_] = f_[1][1][ly_];
+        // f_[4][1][ly_] = f_[2][1][ly_];
+        // f_[7][1][ly_] = f_[5][1][ly_];
+
+        // // Check values
+        // //for (int k = 0; k < q_; k++) {
+        //     //cout << "k = " << k << endl;
+        //     for (int j = 2; j < ly_; j++) {
+        //         //for (int i = 0; i < lx_; i++) {
+        //             cout << fStar_[4][1][j] << " ";
+        //         //}
+        //         cout << "\n";
+        //     }
+        // //}
 
         // Streaming of the fluid nodes
         for (int k = 0; k < q_; k++) {
