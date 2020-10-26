@@ -132,47 +132,47 @@ int main(int, char**) {
         }
 
         // Lower wall boundary bounce back streaming
-        for (int i = 1; i < lx_ + 1; i++) {
+        for (int i = 2; i < lx_; i++) {
             fStar_[2][i][1] = f_[4][i][1]; // bounce back
             fStar_[5][i][1] = f_[7][i][1]; // bounce back
             fStar_[6][i][1] = f_[8][i][1]; // bounce back
         }
 
         // Upper wall boundary bounce back streaming
-        for (int i = 1; i < lx_ + 1; i++) {
+        for (int i = 2; i < lx_; i++) {
             fStar_[4][i][ly_] = f_[2][i][ly_]; // bounce back
             fStar_[7][i][ly_] = f_[5][i][ly_]; // bounce back
             fStar_[8][i][ly_] = f_[6][i][ly_]; // bounce back
         }
 
-        // // Inlet-Bottom corner
-        // f_[6][1][1] = -0.5 * (f_[0][1][1] + 2 * (f_[1][1][1] + f_[2][1][1] + f_[5][1][1]));
-        // f_[8][1][1] = f_[6][1][1];
-        // f_[1][1][1] = f_[3][1][1];
-        // f_[2][1][1] = f_[4][1][1];
-        // f_[5][1][1] = f_[7][1][1];
+         // Inlet-Bottom corner
+         fStar_[6][1][1] = -0.5 * (f_[0][1][1] + 2 * (f_[1][1][1] + f_[2][1][1] + f_[5][1][1]));
+         fStar_[8][1][1] = f_[6][1][1];
+         fStar_[1][1][1] = f_[3][1][1];
+         fStar_[2][1][1] = f_[4][1][1];
+         fStar_[5][1][1] = f_[7][1][1];
 
-        // // Inlet-Top corner
-        // f_[5][1][ly_] = -0.5 * (f_[0][1][ly_] + 2 * (f_[1][1][ly_] + f_[4][1][ly_] + f_[8][1][ly_]));
-        // f_[7][1][ly_] = f_[5][1][ly_];
-        // f_[1][1][ly_] = f_[3][1][ly_];
-        // f_[4][1][ly_] = f_[2][1][ly_];
-        // f_[8][1][ly_] = f_[6][1][ly_];
+         // Inlet-Top corner
+         fStar_[5][1][ly_] = -0.5 * (f_[0][1][ly_] + 2 * (f_[1][1][ly_] + f_[4][1][ly_] + f_[8][1][ly_]));
+         fStar_[7][1][ly_] = f_[5][1][ly_];
+         fStar_[1][1][ly_] = f_[3][1][ly_];
+         fStar_[4][1][ly_] = f_[2][1][ly_];
+         fStar_[8][1][ly_] = f_[6][1][ly_];
 
-        // // Outlet-Bottom corner
-        // f_[5][1][ly_] = -0.5 * (f_[0][1][ly_] + 2 * (f_[2][1][ly_] + f_[3][1][ly_] + f_[6][1][ly_]));
-        // f_[7][1][ly_] = f_[5][1][ly_];
-        // f_[3][1][ly_] = f_[1][1][ly_];
-        // f_[2][1][ly_] = f_[4][1][ly_];
-        // f_[6][1][ly_] = f_[8][1][ly_];
+         // Outlet-Bottom corner
+         fStar_[5][1][ly_] = -0.5 * (f_[0][1][ly_] + 2 * (f_[2][1][ly_] + f_[3][1][ly_] + f_[6][1][ly_]));
+         fStar_[7][1][ly_] = f_[5][1][ly_];
+         fStar_[3][1][ly_] = f_[1][1][ly_];
+         fStar_[2][1][ly_] = f_[4][1][ly_];
+         fStar_[6][1][ly_] = f_[8][1][ly_];
 
 
-        // // // Outlet-Top corner
-        // f_[6][1][ly_] = -0.5 * (f_[0][1][ly_] + 2 * (f_[3][1][ly_] + f_[4][1][ly_] + f_[7][1][ly_]));
-        // f_[8][1][ly_] = f_[6][1][ly_];
-        // f_[3][1][ly_] = f_[1][1][ly_];
-        // f_[4][1][ly_] = f_[2][1][ly_];
-        // f_[7][1][ly_] = f_[5][1][ly_];
+         // // Outlet-Top corner
+         fStar_[6][1][ly_] = -0.5 * (f_[0][1][ly_] + 2 * (f_[3][1][ly_] + f_[4][1][ly_] + f_[7][1][ly_]));
+         fStar_[8][1][ly_] = f_[6][1][ly_];
+         fStar_[3][1][ly_] = f_[1][1][ly_];
+         fStar_[4][1][ly_] = f_[2][1][ly_];
+         fStar_[7][1][ly_] = f_[5][1][ly_];
 
         // // Check values
         // //for (int k = 0; k < q_; k++) {
