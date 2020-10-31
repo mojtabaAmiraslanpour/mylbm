@@ -2,6 +2,7 @@
 #include "src/grid.h"
 #include "src/problem.h"
 #include <math.h>
+#include <vector>
 
 // GENERAL FLOW CONSTANTS
 const int q_ = 9;
@@ -14,12 +15,12 @@ double Re_ = 100; // Reynolds number
 double uMax_ = 0.1; // maximum velocity of Poiseuille inflow
 double nu_ = uMax_ * 2. * radius_ / Re_; // kinematic viscosity
 double omega_ = 1. / (3. * nu_ + 0.5); // relaxation parameter, assuming deltaT = 1 so C_s = 1/3 p.117
-int iter_ = 2000; // total number of iterations
+int iter_ = 1; // total number of iterations
 int tPlot_ = 10; // cycles
 
 // Using D2Q9
-double w_[q_]  = {4.0/9.0, 1.0/9.0, 1.0/9.0, 1.0/9.0, 1.0/9.0,
- 1.0/36.0, 1.0/36.0, 1.0/36.0, 1.0/36.0}; // Weights
+double w_[q_]  = {4./9., 1./9., 1./9., 1./9., 1./9.,
+ 1./36., 1./36., 1./36., 1./36.}; // Weights
 int cx_[q_] = {0,   1,  0, -1,  0,    1,  -1,  -1,   1};
 int cy_[q_] = {0,   0,  1,  0, -1,    1,   1,  -1,  -1};
 
@@ -33,6 +34,18 @@ int main(int, char**) {
 
     // Defining the problem
     problem cylinder(mesh_, q_);
+
+    double r;
+    vector< pair <int, int> > obst;
+    // Defining the cylinder nodes
+    for (int i = 1; i < lx_ + 1; i++) {
+        for (int j = 1; j < ly_ + 1; j++) {
+            r = sqrt(i * i + j * j);
+            if (r <= radius_) {
+                obst.push_back(make_pair(i, j));
+            }
+        }
+    }
     
     // initialization of the population with macroscopic variables
     cylinder.initialize(uMax_, f_, rho_, Ux_, Uy_, w_, cx_, cy_);
@@ -145,34 +158,33 @@ int main(int, char**) {
             fStar_[8][i][ly_] = f_[6][i][ly_]; // bounce back
         }
 
-         // Inlet-Bottom corner
-         fStar_[6][1][1] = -0.5 * (f_[0][1][1] + 2 * (f_[1][1][1] + f_[2][1][1] + f_[5][1][1]));
-         fStar_[8][1][1] = f_[6][1][1];
-         fStar_[1][1][1] = f_[3][1][1];
-         fStar_[2][1][1] = f_[4][1][1];
-         fStar_[5][1][1] = f_[7][1][1];
+        // Inlet-Bottom corner
+        fStar_[6][1][1] = -0.5 * (f_[0][1][1] + 2 * (f_[1][1][1] + f_[2][1][1] + f_[5][1][1]));
+        fStar_[8][1][1] = f_[6][1][1];
+        fStar_[1][1][1] = f_[3][1][1];
+        fStar_[2][1][1] = f_[4][1][1];
+        fStar_[5][1][1] = f_[7][1][1];
 
-         // Inlet-Top corner
-         fStar_[5][1][ly_] = -0.5 * (f_[0][1][ly_] + 2 * (f_[1][1][ly_] + f_[4][1][ly_] + f_[8][1][ly_]));
-         fStar_[7][1][ly_] = f_[5][1][ly_];
-         fStar_[1][1][ly_] = f_[3][1][ly_];
-         fStar_[4][1][ly_] = f_[2][1][ly_];
-         fStar_[8][1][ly_] = f_[6][1][ly_];
+        // Inlet-Top corner
+        fStar_[5][1][ly_] = -0.5 * (f_[0][1][ly_] + 2 * (f_[1][1][ly_] + f_[4][1][ly_] + f_[8][1][ly_]));
+        fStar_[7][1][ly_] = f_[5][1][ly_];
+        fStar_[1][1][ly_] = f_[3][1][ly_];
+        fStar_[4][1][ly_] = f_[2][1][ly_];
+        fStar_[8][1][ly_] = f_[6][1][ly_];
 
-         // Outlet-Bottom corner
-         fStar_[5][1][ly_] = -0.5 * (f_[0][1][ly_] + 2 * (f_[2][1][ly_] + f_[3][1][ly_] + f_[6][1][ly_]));
-         fStar_[7][1][ly_] = f_[5][1][ly_];
-         fStar_[3][1][ly_] = f_[1][1][ly_];
-         fStar_[2][1][ly_] = f_[4][1][ly_];
-         fStar_[6][1][ly_] = f_[8][1][ly_];
+        // Outlet-Bottom corner
+        fStar_[5][1][ly_] = -0.5 * (f_[0][1][ly_] + 2 * (f_[2][1][ly_] + f_[3][1][ly_] + f_[6][1][ly_]));
+        fStar_[7][1][ly_] = f_[5][1][ly_];
+        fStar_[3][1][ly_] = f_[1][1][ly_];
+        fStar_[2][1][ly_] = f_[4][1][ly_];
+        fStar_[6][1][ly_] = f_[8][1][ly_];
 
-
-         // // Outlet-Top corner
-         fStar_[6][1][ly_] = -0.5 * (f_[0][1][ly_] + 2 * (f_[3][1][ly_] + f_[4][1][ly_] + f_[7][1][ly_]));
-         fStar_[8][1][ly_] = f_[6][1][ly_];
-         fStar_[3][1][ly_] = f_[1][1][ly_];
-         fStar_[4][1][ly_] = f_[2][1][ly_];
-         fStar_[7][1][ly_] = f_[5][1][ly_];
+        // // Outlet-Top corner
+        fStar_[6][1][ly_] = -0.5 * (f_[0][1][ly_] + 2 * (f_[3][1][ly_] + f_[4][1][ly_] + f_[7][1][ly_]));
+        fStar_[8][1][ly_] = f_[6][1][ly_];
+        fStar_[3][1][ly_] = f_[1][1][ly_];
+        fStar_[4][1][ly_] = f_[2][1][ly_];
+        fStar_[7][1][ly_] = f_[5][1][ly_];
 
         // // Check values
         // //for (int k = 0; k < q_; k++) {
