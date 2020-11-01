@@ -37,6 +37,7 @@ int main(int, char**) {
 
     double r;
     vector< pair <int, int> > obst;
+    int sizeObst = sizeof(obst) / sizeof(obst[0]);
     // Defining the cylinder nodes
     for (int i = 1; i < lx_ + 1; i++) {
         for (int j = 1; j < ly_ + 1; j++) {
@@ -45,6 +46,11 @@ int main(int, char**) {
                 obst.push_back(make_pair(i, j));
             }
         }
+    }
+    int m, n;
+
+    for (int i = 0; i < sizeObst; i++) {
+        cout << obst[i].first << " " << obst[i].second << endl;
     }
     
     // initialization of the population with macroscopic variables
@@ -185,6 +191,19 @@ int main(int, char**) {
         fStar_[3][1][ly_] = f_[1][1][ly_];
         fStar_[4][1][ly_] = f_[2][1][ly_];
         fStar_[7][1][ly_] = f_[5][1][ly_];
+
+        for (int i = 0; i < sizeObst; i++) {
+            m = obst[i].first;
+            n = obst[i].second;
+            fStar_[1][m][n] = f_[3][m][n];
+            fStar_[2][m][n] = f_[4][m][n];
+            fStar_[3][m][n] = f_[1][m][n];
+            fStar_[4][m][n] = f_[2][m][n];
+            fStar_[5][m][n] = f_[7][m][n];
+            fStar_[6][m][n] = f_[8][m][n];
+            fStar_[7][m][n] = f_[5][m][n];
+            fStar_[8][m][n] = f_[6][m][n];
+        }
 
         // // Check values
         // //for (int k = 0; k < q_; k++) {
