@@ -6,8 +6,8 @@
 
 // GENERAL FLOW CONSTANTS
 const int q_ = 9;
-const int lx_ = 100; // number of cells in x-direction
-const int ly_ = 50; // number of cells in y-direction
+const int lx_ = 400; // number of cells in x-direction
+const int ly_ = 100; // number of cells in y-direction
 double pos_x_ = lx_/5.; // position of the cylinder; (exact
 double pos_y_ = ly_/2. + 3; // y-symmetry is avoided)
 double radius_ = ly_/10. + 1; // radius of the cylinder
@@ -15,7 +15,7 @@ double Re_ = 100; // Reynolds number
 double uMax_ = 0.1; // maximum velocity of Poiseuille inflow
 double nu_ = uMax_ * 2. * radius_ / Re_; // kinematic viscosity
 double omega_ = 1. / (3. * nu_ + 0.5); // relaxation parameter, assuming deltaT = 1 so C_s = 1/3 p.117
-int iter_ = 1; // total number of iterations
+int iter_ = 2000; // total number of iterations
 int tPlot_ = 10; // cycles
 
 // Using D2Q9
@@ -37,21 +37,22 @@ int main(int, char**) {
 
     double r;
     vector< pair <int, int> > obst;
-    int sizeObst = sizeof(obst) / sizeof(obst[0]);
     // Defining the cylinder nodes
     for (int i = 1; i < lx_ + 1; i++) {
         for (int j = 1; j < ly_ + 1; j++) {
-            r = sqrt(i * i + j * j);
+            r = sqrt((i - pos_x_) * (i - pos_x_) + (j - pos_y_) * (j - pos_y_));
             if (r <= radius_) {
                 obst.push_back(make_pair(i, j));
             }
         }
     }
-    int m, n;
 
-    for (int i = 0; i < sizeObst; i++) {
-        cout << obst[i].first << " " << obst[i].second << endl;
-    }
+    int m, n;
+    int sizeObst = sizeof(obst);
+    //cout << sizeObst << endl;
+    //for (int i = 0; i < sizeObst; i++) {
+    //    cout << obst[i].first << " " << obst[i].second << endl;
+    //}
     
     // initialization of the population with macroscopic variables
     cylinder.initialize(uMax_, f_, rho_, Ux_, Uy_, w_, cx_, cy_);
@@ -192,6 +193,7 @@ int main(int, char**) {
         fStar_[4][1][ly_] = f_[2][1][ly_];
         fStar_[7][1][ly_] = f_[5][1][ly_];
 
+        // Cylinder bounce back
         for (int i = 0; i < sizeObst; i++) {
             m = obst[i].first;
             n = obst[i].second;
